@@ -1,164 +1,231 @@
-#  Cruise Tracker — Real-Time Global Cruise Ship Map
+# Cruise Tracker — Real-Time Global Cruise Ship Tracking Platform
 
-A real-time cruise ship tracking platform built with **AIS live data**, **FastAPI**, and a **modern Leaflet-based UI**.  
-This project streams global AIS data, identifies cruise ships by line, tracks live movement and historical routes, and renders everything on a beautiful, interactive map.
+A production-ready, real-time cruise ship tracking platform built on **live AIS data**, **FastAPI**, and **Google Cloud Run**.
 
-**Live UI (local):**  
- http://127.0.0.1:5173
+This system continuously ingests global AIS messages, automatically identifies cruise ships by line, tracks live positions and voyage routes, and exposes the data via a scalable API for map-based visualization.
 
 ---
 
-##  Features
+##  Live Architecture (Production)
 
--  **Live global cruise ship tracking** (AISStream WebSocket)
--  **Automatic cruise line detection**
-  - Royal Caribbean
-  - Carnival
-  - Norwegian (NCL)
-  - MSC
-  - Virgin Voyages
-  - Disney Cruise Line
--  **Modern, dark-themed interactive map**
--  **Route history per ship**
-  - View **current voyage only**
-  - Toggle to **full historical routes**
--  **Search + filter by cruise line**
--  **Auto-refreshing UI (every 5 seconds)**
--  **Efficient disk storage**
-  - JSON snapshot for last-seen positions
-  - JSONL append-only files for routes
--  **Environment-variable–based API key handling**
-
----
-
-##  Architecture Overview
-
-AISStream WebSocket    
-│         
-▼     
-Backend Tracker (Python)
-* Filters cruise ships by line
-* Writes route points to disk
-* Maintains last-seen snapshot     
-│   
- ▼   
- FastAPI Server
-* /api/last-seen
-* /api/track/{mmsi}    
-│   
- ▼   
- Frontend (Vanilla JS + Leaflet)
-* Live map rendering
-* Route visualization
-	•	Filters + search     
----
-
-## 📁 Project Structure
-
-CruiseSite/
-	├── backend/ │    
-	├── tracker.py # AIS WebSocket + data ingestion │    
-	├── server.py # FastAPI API │    
-	├── last_seen.json # Live snapshot (ignored by git) │   
-		└── data/ │    
-			├── tracks/ # Per-ship route history (.jsonl)  
-			│ └── mmsi_registry.json │  
-	├── web/ │      
-	├── index.html │    
-	├── styles.css │    
-	└── app.js │    
-	├── .env # API key (NOT committed)   
-	├── .gitignore   
-	└── README.md   
----
-
-
-##  Environment Setup (Required)
-
-This project uses **environment variables** to protect API keys.
-
-###  Create `.env`
-```bash
-touch .env
 ```
-Add:
-AISSTREAM_API_KEY=your_real_aisstream_key_here
- Never commit this file — it is ignored by .gitignore.
+AISStream WebSocket (Global AIS)	
+        │	
+        ▼	
+Cloud Run Worker (Always-On)
+  - Persistent WebSocket connection
+  - Filters cruise ships by line
+  - Writes live positions to Firestore
+  - Appends voyage tracks	
+        │	
+        ▼	
+Cloud Run Backend API (FastAPI)
+  /api/last-seen
+  /api/track/{mmsi}	
+        │	
+        ▼	
+Frontend (Leaflet Map UI)
+  Live positions
+  Routes + filters
+```
 
- Export the key to your shell
-(macOS / Linux)
-export AISSTREAM_API_KEY="your_real_aisstream_key_here"
-(Optional: add this line to ~/.zshrc or ~/.bashrc)
+---
 
- Backend Setup
- Create and activate virtual environment
+##  Key Features
+
+###  Live Cruise Ship Tracking
+
+* Real-time global AISStream WebSocket ingestion
+* Continuous background worker (Cloud Run)
+* Automatic cruise ship detection and classification
+
+###  Supported Cruise Lines
+
+* Royal Caribbean
+* Carnival
+* Norwegian (NCL)
+* MSC Cruises
+* Virgin Voyages
+* Disney Cruise Line
+
+###  Interactive Map Experience
+
+* Live ship positions
+* Route visualization per ship
+* Toggle between:
+
+  * Current voyage only
+  * Full historical tracks
+* Search by ship name
+* Filter by cruise line
+* Auto-refreshing UI
+
+###  Smart Route Tracking
+
+* Ships grouped into **voyages (trips)**
+* New voyage starts when:
+
+  * ≥ 6 hours of inactivity **or**
+  * ≥ 150 km position jump
+* Efficient storage:
+
+  * Points saved only if:
+
+    * ≥ 200 meters moved **or**
+    * ≥ 60 seconds elapsed
+
+---
+
+##  Project Structure
+
+```
+cruise-tracker/
+├── backend/
+│   ├── server.py            # FastAPI backend (Cloud Run)
+│   ├── TrackAPI.py          # AIS ingestion + worker logic
+│   ├── firestore_db.py      # Firestore read/write helpers
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── web/
+│   ├── index.html           # Frontend UI
+│   ├── styles.css
+│   └── app.js
+│
+├── .gitignore
+└── README.md
+```
+
+---
+
+##  Cloud Deployment (Current Setup)
+
+### Backend API
+
+* **Google Cloud Run**
+* Public HTTP service
+* Stateless FastAPI application
+* Auto-scales on demand
+
+### AIS Worker
+
+* **Google Cloud Run (background worker)**
+* `min-instances = 1` (always running)
+* Maintains live WebSocket connection
+* CPU throttling enabled for cost efficiency
+
+### Data Storage
+
+* **Firestore (Native mode)**
+
+  * Ship metadata
+  * Last-seen positions
+  * Voyage track points
+
+### Secrets
+
+* **Google Secret Manager**
+
+  * `AISSTREAM_API_KEY`
+* No API keys committed to GitHub
+
+---
+
+##  Security & Safety
+
+* No credentials hardcoded
+* Secrets injected at runtime
+* Firestore access via service account
+* Worker service is **not publicly invokable**
+* Safe for public GitHub repositories
+
+---
+
+##  API Endpoints
+
+### Get Live Ship Positions
+
+```
+GET /api/last-seen
+```
+
+Returns all discovered cruise ships with latest known positions.
+
+---
+
+### Get Ship Route
+
+```
+GET /api/track/{mmsi}?mode=current|all
+```
+
+* `current` → current voyage only
+* `all` → full historical track
+
+---
+
+##  Local Development (Optional)
+
+### Backend
+
+```bash
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate
- Install dependencies
-
-```bash
- pip install -r requirements.txt
+pip install -r requirements.txt
+uvicorn server:app --reload
 ```
-pip install fastapi uvicorn websocket-client
 
- Running the Project (3 terminals)
- Terminal 1 — Start AIS Tracker
-Streams live AIS data and writes ship positions + routes.
+### Worker (local testing)
+
 ```bash
-cd backend
-source .venv/bin/activate
+export AISSTREAM_API_KEY="your_key_here"
 python TrackAPI.py
 ```
-You should see output like:
-[DISCOVERED] ICON OF THE SEAS [royal]
-[2025-12-14T00:27:54+00:00] NORWEGIAN JADE [ncl] | Lat: ...
 
- Terminal 2 — Start FastAPI Server
-Serves ship data to the frontend.
-```bash
-cd backend
-source .venv/bin/activate
-uvicorn server:app --reload --port 8000
-```
-API endpoints:
-* GET /api/last-seen
-* GET /api/track/{mmsi}?mode=current|all
+### Frontend
 
- Terminal 3 — Start Frontend
-Serves the UI.
 ```bash
 cd web
 python -m http.server 5173
 ```
- Open in browser:
-http://127.0.0.1:5173
 
- How Route Tracking Works
-* Ships are grouped into voyages ("trips")
-* A new trip starts when:
-    * Time gap ≥ 6 hours, or
-    * Distance jump ≥ 150 km
-* Only meaningful points are saved:
-    * ≥ 200 meters moved OR
-    * ≥ 60 seconds elapsed
-* Routes are drawn using Leaflet polylines
+---
 
- Security Notes
-* API keys are never hardcoded
-* .env is ignored by Git
-* Live data files are excluded from version control
-* Safe for public GitHub repositories
+##  Cost Awareness
 
- Future Improvements
-* Production deployment (Fly.io / Railway / AWS)
-* Database-backed storage (Postgres)
-* Playback timeline for routes
+This system is designed to be **cheap to run**:
+
+* Cloud Run worker (0.25 CPU, 512MB, throttled)
+* Firestore free tier
+* No VMs
+
+**Typical cost:** ~$7–9/month
+Billing alerts recommended (and configured).
+
+---
+
+##  Future Improvements
+
+* Playback timeline for voyages
+* Port arrival/departure detection
 * Heatmaps of cruise traffic
-* Mobile UI optimizations
+* PostgreSQL or BigQuery analytics
+* Mobile UI optimization
+* Authentication + saved views
 
- Author
-Built by Avi Maslow Columbia University — Computer Science Focus: real-time systems, data pipelines, and clean visualizations
+---
 
-⭐ If you like this project
-Give it a star ⭐ and feel free to fork or contribute!
+##  Author
+
+**Avi Maslow**
+Columbia University — Computer Science
+Focus: real-time systems, cloud architecture, data pipelines, and visualization
+
+---
+
+⭐ If you like this project, feel free to **star**, **fork**, or build on it.
+
+---
+
+
