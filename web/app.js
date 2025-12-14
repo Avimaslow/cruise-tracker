@@ -359,7 +359,7 @@ async function fetchPortsForViewport() {
   if (!portsEnabled) return [];
 
   // Only show ports once zoomed in enough (prevents clutter)
-  if (map.getZoom() < 6) return [];
+  if (map.getZoom() < 4) return [];
 
   const b = map.getBounds();
   const url =

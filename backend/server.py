@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from firestore_db import get_client, get_all_ships, get_track_points
+from ports_db import query_ports  # <-- add this
 
 app = FastAPI()
 
@@ -12,17 +13,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
 @app.get("/")
 def root():
     return {"ok": True, "service": "cruise-backend"}
-
-
-
-
-
-
 
 @app.get("/api/last-seen")
 def api_last_seen():
@@ -41,5 +34,13 @@ def api_track(mmsi: str, mode: str = "current"):
         "points": points,
     }
 
-# keep your existing /api/ports and /api/voyage routes if you want:
-# You can paste them below unchanged OR we can move ports to Firestore later.
+@app.get("/api/ports")
+def api_ports(
+    min_lat: float = Query(...),
+    min_lon: float = Query(...),
+    max_lat: float = Query(...),
+    max_lon: float = Query(...),
+    limit: int = Query(1200, ge=1, le=5000),
+):
+    ports = query_ports(min_lat, min_lon, max_lat, max_lon, limit)
+    return {"ports": ports}
