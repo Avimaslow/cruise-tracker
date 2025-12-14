@@ -1,6 +1,6 @@
 // web/app.js
 
-const API_URL = "http://127.0.0.1:8000/api/last-seen";
+const API_URL = "https://cruise-backend-320129656576.us-east1.run.app/api/last-seen";
 const REFRESH_MS = 5000;
 const OFFLINE_AFTER_MIN = 15;
 
@@ -119,7 +119,7 @@ function getFilteredShips(shipsObj) {
 // Backend should support: GET /api/track/{mmsi}?mode=current|all
 async function drawRoute(mmsi, mode = "current") {
   try {
-    const url = `http://127.0.0.1:8000/api/track/${encodeURIComponent(mmsi)}?mode=${encodeURIComponent(mode)}`;
+    const url = `https://cruise-backend-320129656576.us-east1.run.app/api/track/${encodeURIComponent(mmsi)}?mode=${encodeURIComponent(mode)}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return;
 
@@ -339,7 +339,7 @@ function wireEvents() {
   });
 }
 // --- Ports overlay (viewport loaded) ---
-const API_PORTS = "http://127.0.0.1:8000/api/ports";
+const API_PORTS = "https://cruise-backend-320129656576.us-east1.run.app/api/ports";
 
 let portsLayer = null;
 let portsEnabled = true;     // toggle later if you want

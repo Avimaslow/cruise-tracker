@@ -1,14 +1,17 @@
-# Secrets
-.env
-
 # Python
 __pycache__/
 *.pyc
+.venv/
+.env
 
+# Local data
+backend/data/
+backend/last_seen.json
+backend/*.json
+backend/*.jsonl
 
+# Logs
+*.log
 
 # OS
 .DS_Store
-
-# Node
-node_modules/
