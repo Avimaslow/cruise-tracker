@@ -33,21 +33,45 @@ This project streams global AIS data, identifies cruise ships by line, tracks li
 
 ##  Architecture Overview
 
-AISStream WebSocket │ ▼ Backend Tracker (Python)
+AISStream WebSocket    
+│         
+▼     
+Backend Tracker (Python)
 * Filters cruise ships by line
 * Writes route points to disk
-* Maintains last-seen snapshot │ ▼ FastAPI Server
+* Maintains last-seen snapshot     
+│   
+ ▼   
+ FastAPI Server
 * /api/last-seen
-* /api/track/{mmsi} │ ▼ Frontend (Vanilla JS + Leaflet)
+* /api/track/{mmsi}    
+│   
+ ▼   
+ Frontend (Vanilla JS + Leaflet)
 * Live map rendering
 * Route visualization
-	•	Filters + search
+	•	Filters + search     
 ---
 
-##  Project Structure
+## 📁 Project Structure
 
-CruiseSite/ ├── backend/ │ ├── tracker.py # AIS WebSocket + data ingestion │ ├── server.py # FastAPI API │ ├── last_seen.json # Live snapshot (ignored by git) │ └── data/ │ ├── tracks/ # Per-ship route history (.jsonl) │ └── mmsi_registry.json │ ├── web/ │ ├── index.html │ ├── styles.css │ └── app.js │ ├── .env # API key (NOT committed) ├── .gitignore └── README.md
+CruiseSite/
+	├── backend/ │    
+	├── tracker.py # AIS WebSocket + data ingestion │    
+	├── server.py # FastAPI API │    
+	├── last_seen.json # Live snapshot (ignored by git) │   
+		└── data/ │    
+			├── tracks/ # Per-ship route history (.jsonl)  
+			│ └── mmsi_registry.json │  
+	├── web/ │      
+	├── index.html │    
+	├── styles.css │    
+	└── app.js │    
+	├── .env # API key (NOT committed)   
+	├── .gitignore   
+	└── README.md   
 ---
+
 
 ##  Environment Setup (Required)
 
@@ -56,6 +80,7 @@ This project uses **environment variables** to protect API keys.
 ###  Create `.env`
 ```bash
 touch .env
+```
 Add:
 AISSTREAM_API_KEY=your_real_aisstream_key_here
  Never commit this file — it is ignored by .gitignore.
@@ -76,26 +101,32 @@ pip install fastapi uvicorn websocket-client
  Running the Project (3 terminals)
  Terminal 1 — Start AIS Tracker
 Streams live AIS data and writes ship positions + routes.
+```bash
 cd backend
 source .venv/bin/activate
 python tracker.py
+```
 You should see output like:
 [DISCOVERED] ICON OF THE SEAS [royal]
 [2025-12-14T00:27:54+00:00] NORWEGIAN JADE [ncl] | Lat: ...
 
  Terminal 2 — Start FastAPI Server
 Serves ship data to the frontend.
+```bash
 cd backend
 source .venv/bin/activate
 uvicorn server:app --reload --port 8000
+```
 API endpoints:
 * GET /api/last-seen
 * GET /api/track/{mmsi}?mode=current|all
 
  Terminal 3 — Start Frontend
 Serves the UI.
+```bash
 cd web
 python -m http.server 5173
+```
  Open in browser:
 http://127.0.0.1:5173
 
