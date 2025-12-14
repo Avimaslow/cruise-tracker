@@ -28,6 +28,57 @@ function minutesSince(isoString) {
   return (Date.now() - t) / 60000;
 }
 
+/**
+ * Eastern Time display (DST-safe)
+ */
+function formatEasternTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+// Details button: open ship page in a new tab
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-details][data-mmsi]");
+  if (!btn) return;
+  const mmsi = btn.getAttribute("data-mmsi");
+  if (!mmsi) return;
+
+  window.open(`ship.html?mmsi=${encodeURIComponent(mmsi)}`, "_blank", "noopener,noreferrer");
+});
+
+/**
+ * Ship "local" time approximation using longitude:
+ * offsetHours ≈ round(lon / 15)
+ * (nautical time, not political timezones)
+ */
+function formatShipLocalTime(iso, lon) {
+  if (!iso || lon == null) return "—";
+
+  const d = new Date(iso);
+  const offsetHours = Math.round(Number(lon) / 15);
+
+  const localMs = d.getTime() + offsetHours * 60 * 60 * 1000;
+  const local = new Date(localMs);
+
+  const sign = offsetHours >= 0 ? "+" : "−";
+  return `${local.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  })} (UTC${sign}${Math.abs(offsetHours)})`;
+}
+
 function initMap() {
   map = L.map("map", { zoomControl: true }).setView([25.7617, -80.1918], 4);
 
@@ -135,7 +186,16 @@ function renderList(shipsObj) {
       </div>
 
       <div class="card-grid">
-        <div class="kv"><div class="k">Last seen</div><div class="v">${s.last_seen || "—"}</div></div>
+        <div class="kv">
+          <div class="k">Last seen (ET)</div>
+          <div class="v">${formatEasternTime(s.last_seen)}</div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Ship local time</div>
+          <div class="v">${formatShipLocalTime(s.last_seen, s.lon)}</div>
+        </div>
+
         <div class="kv"><div class="k">Speed</div><div class="v">${s.speed ?? "—"} kn</div></div>
         <div class="kv"><div class="k">Lat</div><div class="v">${s.lat?.toFixed?.(5) ?? "—"}</div></div>
         <div class="kv"><div class="k">Lon</div><div class="v">${s.lon?.toFixed?.(5) ?? "—"}</div></div>
@@ -173,19 +233,24 @@ function upsertMarkers(shipsObj) {
         <div style="opacity:.75;font-size:12px;margin-top:2px">MMSI ${mmsi} • ${lineLabel}</div>
 
         <div style="margin-top:10px; font-size:12px; opacity:.9">
-          Last seen: ${rec.last_seen || "—"}<br/>
+          Last seen (ET): ${formatEasternTime(rec.last_seen)}<br/>
+          Ship local: ${formatShipLocalTime(rec.last_seen, rec.lon)}<br/>
           Speed: ${rec.speed ?? "—"} kn<br/>
           Course: ${rec.course ?? "—"}
         </div>
 
-        <div style="display:flex; gap:8px; margin-top:12px">
-          <button data-route="current" data-mmsi="${mmsi}" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:white;cursor:pointer;">
-            Current route
-          </button>
-          <button data-route="all" data-mmsi="${mmsi}" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:white;cursor:pointer;">
-            All history
-          </button>
-        </div>
+        <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap">
+  <button data-route="current" data-mmsi="${mmsi}" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:white;cursor:pointer;">
+    Current route
+  </button>
+  <button data-route="all" data-mmsi="${mmsi}" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:white;cursor:pointer;">
+    All history
+  </button>
+  <button data-details="1" data-mmsi="${mmsi}" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.25);color:white;cursor:pointer;">
+    View ship
+  </button>
+</div>
+
       </div>
     `;
 
@@ -221,7 +286,8 @@ async function fetchAndRender() {
     const data = await res.json();
     shipsCache = data.ships || {};
 
-    lastUpdateEl.textContent = new Date().toISOString();
+    // show ET for the "Last update" too
+    lastUpdateEl.textContent = formatEasternTime(new Date().toISOString());
 
     statusEl.textContent = "OK";
     statusEl.style.borderColor = "rgba(46,229,157,0.35)";
@@ -272,9 +338,90 @@ function wireEvents() {
     await drawRoute(String(mmsi), mode);
   });
 }
+// --- Ports overlay (viewport loaded) ---
+const API_PORTS = "http://127.0.0.1:8000/api/ports";
+
+let portsLayer = null;
+let portsEnabled = true;     // toggle later if you want
+let portsMoveTimer = null;
+
+function portIcon() {
+  // small, minimal
+  return L.divIcon({
+    className: "",
+    html: `<div style="font-size:12px; line-height:12px; transform: translate(-2px,-6px);">⚓</div>`,
+    iconSize: [12, 12],
+    iconAnchor: [6, 6],
+  });
+}
+
+async function fetchPortsForViewport() {
+  if (!portsEnabled) return [];
+
+  // Only show ports once zoomed in enough (prevents clutter)
+  if (map.getZoom() < 6) return [];
+
+  const b = map.getBounds();
+  const url =
+    `${API_PORTS}` +
+    `?min_lat=${encodeURIComponent(b.getSouth())}` +
+    `&min_lon=${encodeURIComponent(b.getWest())}` +
+    `&max_lat=${encodeURIComponent(b.getNorth())}` +
+    `&max_lon=${encodeURIComponent(b.getEast())}` +
+    `&limit=1200`;
+
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.ports || [];
+}
+
+async function renderPorts() {
+  if (!portsLayer) return;
+
+  portsLayer.clearLayers();
+
+  const ports = await fetchPortsForViewport();
+  if (!ports.length) return;
+
+  for (const p of ports) {
+    const m = L.marker([p.lat, p.lon], { icon: portIcon(), interactive: true });
+    m.bindPopup(`<b>${escapeHtml(p.name)}</b><br/>${escapeHtml(p.country || "")}`);
+    portsLayer.addLayer(m);
+  }
+}
+
+function setupPortsOverlay() {
+  portsLayer = L.layerGroup().addTo(map);
+
+  // Re-render on moveend (debounced)
+  map.on("moveend", () => {
+    clearTimeout(portsMoveTimer);
+    portsMoveTimer = setTimeout(renderPorts, 250);
+  });
+
+  // Also re-render on zoomend
+  map.on("zoomend", () => {
+    clearTimeout(portsMoveTimer);
+    portsMoveTimer = setTimeout(renderPorts, 150);
+  });
+
+  renderPorts();
+}
+
+// small HTML escape helper (prevents weird names from breaking popup)
+function escapeHtml(s) {
+  return String(s || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 // Boot
 initMap();
+setupPortsOverlay();
 wireEvents();
 fetchAndRender();
 setInterval(fetchAndRender, REFRESH_MS);

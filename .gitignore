@@ -5,10 +5,7 @@
 __pycache__/
 *.pyc
 
-# Data files
-backend/last_seen.json
-backend/data/
-backend/*.json
+
 
 # OS
 .DS_Store

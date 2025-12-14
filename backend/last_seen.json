@@ -1,0 +1,371 @@
+{
+  "311000934": {
+    "name": "DISNEY ADVENTURE",
+    "line": "disney",
+    "lat": 53.564571666666666,
+    "lon": 8.559435,
+    "speed": 0,
+    "course": 196.1,
+    "last_seen": "2025-12-14T15:05:54+00:00"
+  },
+  "355263000": {
+    "name": "CARNIVAL RADIANCE",
+    "line": "carnival",
+    "lat": 32.43902833333333,
+    "lon": -117.716135,
+    "speed": 21.1,
+    "course": 159,
+    "last_seen": "2025-12-14T05:22:19+00:00"
+  },
+  "355931000": {
+    "name": "MSC POESIA",
+    "line": "msc",
+    "lat": 53.53814,
+    "lon": 9.994835,
+    "speed": 0.1,
+    "course": 331.7,
+    "last_seen": "2025-12-14T15:04:40+00:00"
+  },
+  "366994450": {
+    "name": "PRIDE OF AMERICA",
+    "line": "ncl",
+    "lat": 21.257648333333336,
+    "lon": -157.879515,
+    "speed": 10.9,
+    "course": 182.5,
+    "last_seen": "2025-12-14T05:22:21+00:00"
+  },
+  "311082000": {
+    "name": "NORWEGIAN STAR",
+    "line": "ncl",
+    "lat": 20.85338833333333,
+    "lon": -86.770415,
+    "speed": 22,
+    "course": 33.4,
+    "last_seen": "2025-12-14T02:42:40+00:00"
+  },
+  "311018500": {
+    "name": "NORWEGIAN EPIC",
+    "line": "ncl",
+    "lat": 18.700765,
+    "lon": -65.84125166666666,
+    "speed": 9.5,
+    "course": 281.7,
+    "last_seen": "2025-12-14T05:10:32+00:00"
+  },
+  "256070000": {
+    "name": "MSC WORLD EUROPA",
+    "line": "msc",
+    "lat": 44.41122666666667,
+    "lon": 8.917536666666667,
+    "speed": 0,
+    "course": 292.9,
+    "last_seen": "2025-12-14T15:00:23+00:00"
+  },
+  "311746000": {
+    "name": "NORWEGIAN SPIRIT",
+    "line": "ncl",
+    "lat": -35.22997,
+    "lon": 137.99593166666668,
+    "speed": 7,
+    "course": 240.9,
+    "last_seen": "2025-12-14T15:05:40+00:00"
+  },
+  "249973000": {
+    "name": "MSC MERAVIGLIA",
+    "line": "msc",
+    "lat": 40.683393333333335,
+    "lon": -74.01367166666667,
+    "speed": 0.1,
+    "course": 315.3,
+    "last_seen": "2025-12-14T14:35:20+00:00"
+  },
+  "311001201": {
+    "name": "CARNIVAL LUMINOSA",
+    "line": "carnival",
+    "lat": -27.321493333333333,
+    "lon": 153.20134666666667,
+    "speed": 12.7,
+    "course": 32.1,
+    "last_seen": "2025-12-14T05:22:47+00:00"
+  },
+  "311001551": {
+    "name": "STAR OF THE SEAS",
+    "line": "royal",
+    "lat": 28.408751666666667,
+    "lon": -80.61013833333332,
+    "speed": 0,
+    "course": 228.4,
+    "last_seen": "2025-12-14T15:03:41+00:00"
+  },
+  "249193000": {
+    "name": "MSC WORLD AMERICA",
+    "line": "msc",
+    "lat": 25.391531666666666,
+    "lon": -79.69245666666667,
+    "speed": 18.7,
+    "course": 140.6,
+    "last_seen": "2025-12-14T01:49:58+00:00"
+  },
+  "370490000": {
+    "name": "CARNIVAL DREAM",
+    "line": "carnival",
+    "lat": 28.876058333333333,
+    "lon": -93.95106833333332,
+    "speed": 18.9,
+    "course": 128.4,
+    "last_seen": "2025-12-14T01:29:18+00:00"
+  },
+  "311001059": {
+    "name": "NORWEGIAN PRIMA",
+    "line": "ncl",
+    "lat": 28.415821666666666,
+    "lon": -80.62551833333333,
+    "speed": 0,
+    "course": 223.2,
+    "last_seen": "2025-12-14T15:04:53+00:00"
+  },
+  "308416000": {
+    "name": "NORWEGIAN JADE",
+    "line": "ncl",
+    "lat": 31.527448333333332,
+    "lon": -117.11275333333333,
+    "speed": 17.4,
+    "course": 161.7,
+    "last_seen": "2025-12-14T05:02:29+00:00"
+  },
+  "311000983": {
+    "name": "VALIANT LADY",
+    "line": "virgin",
+    "lat": 18.138123333333333,
+    "lon": -64.88264333333333,
+    "speed": 20.4,
+    "course": 122,
+    "last_seen": "2025-12-14T05:22:45+00:00"
+  },
+  "352003000": {
+    "name": "MSC MUSICA",
+    "line": "msc",
+    "lat": 28.471936666666668,
+    "lon": -16.241633333333333,
+    "speed": 0,
+    "course": 256.1,
+    "last_seen": "2025-12-14T15:05:13+00:00"
+  },
+  "311583000": {
+    "name": "JEWEL OF THE SEAS",
+    "line": "royal",
+    "lat": 18.33107,
+    "lon": -64.95437666666666,
+    "speed": 0,
+    "course": 76.8,
+    "last_seen": "2025-12-14T15:03:22+00:00"
+  },
+  "372497000": {
+    "name": "MSC ORCHESTRA",
+    "line": "msc",
+    "lat": 41.341335,
+    "lon": 2.17039,
+    "speed": 0,
+    "course": 345.1,
+    "last_seen": "2025-12-14T15:07:19+00:00"
+  },
+  "210563000": {
+    "name": "SPECTRUM OF THE SEAS",
+    "line": "royal",
+    "lat": 22.305691666666668,
+    "lon": 114.21256833333334,
+    "speed": 0,
+    "course": 268.3,
+    "last_seen": "2025-12-14T03:35:03+00:00"
+  },
+  "311001221": {
+    "name": "DISNEY TREASURE",
+    "line": "disney",
+    "lat": 26.941526666666668,
+    "lon": -79.76959166666667,
+    "speed": 16.8,
+    "course": 150.2,
+    "last_seen": "2025-12-14T03:52:52+00:00"
+  },
+  "374527000": {
+    "name": "CARNIVAL PANORAMA",
+    "line": "carnival",
+    "lat": 33.75009166666667,
+    "lon": -118.18681166666667,
+    "speed": 0.1,
+    "course": 101.8,
+    "last_seen": "2025-12-14T15:07:27+00:00"
+  },
+  "354215000": {
+    "name": "CARNIVAL PRIDE",
+    "line": "carnival",
+    "lat": 39.26391666666667,
+    "lon": -76.599685,
+    "speed": 0,
+    "course": 14.9,
+    "last_seen": "2025-12-14T15:04:46+00:00"
+  },
+  "352003546": {
+    "name": "CARNIVAL FIRENZE",
+    "line": "carnival",
+    "lat": 31.658313333333336,
+    "lon": -117.68881,
+    "speed": 1.2,
+    "course": 34.3,
+    "last_seen": "2025-12-14T15:05:22+00:00"
+  },
+  "311000807": {
+    "name": "SCARLET LADY",
+    "line": "virgin",
+    "lat": 25.781603333333333,
+    "lon": -80.18026833333333,
+    "speed": 0,
+    "course": 20.6,
+    "last_seen": "2025-12-14T15:04:46+00:00"
+  },
+  "215325000": {
+    "name": "MSC GRANDIOSA",
+    "line": "msc",
+    "lat": 26.83632833333333,
+    "lon": -79.93966166666668,
+    "speed": 16.2,
+    "course": 173.8,
+    "last_seen": "2025-12-14T05:22:17+00:00"
+  },
+  "352594000": {
+    "name": "MSC MAGNIFICA",
+    "line": "msc",
+    "lat": 43.34511666666666,
+    "lon": 5.332193333333334,
+    "speed": 0,
+    "course": 256.7,
+    "last_seen": "2025-12-14T13:43:44+00:00"
+  },
+  "215920000": {
+    "name": "MSC SEASHORE",
+    "line": "msc",
+    "lat": 28.411895,
+    "lon": -80.62592,
+    "speed": 0,
+    "course": 265.4,
+    "last_seen": "2025-12-14T15:05:25+00:00"
+  },
+  "311000660": {
+    "name": "SYMPHONY OF THE SEAS",
+    "line": "royal",
+    "lat": 25.77218333333333,
+    "lon": -80.15711666666667,
+    "speed": 0,
+    "course": 338.2,
+    "last_seen": "2025-12-14T15:05:04+00:00"
+  },
+  "370039000": {
+    "name": "CARNIVAL HORIZON",
+    "line": "carnival",
+    "lat": 25.776153333333333,
+    "lon": -80.16773166666667,
+    "speed": 0,
+    "course": 7,
+    "last_seen": "2025-12-14T15:04:57+00:00"
+  },
+  "311307000": {
+    "name": "NORWEGIAN DAWN",
+    "line": "ncl",
+    "lat": 27.942223333333335,
+    "lon": -82.447265,
+    "speed": 0,
+    "course": 157.2,
+    "last_seen": "2025-12-14T15:06:02+00:00"
+  },
+  "311020700": {
+    "name": "ALLURE OF THE SEAS",
+    "line": "royal",
+    "lat": 26.0868,
+    "lon": -80.11973333333334,
+    "speed": 0,
+    "course": 257.4,
+    "last_seen": "2025-12-14T15:03:44+00:00"
+  },
+  "311000599": {
+    "name": "NORWEGIAN JOY",
+    "line": "ncl",
+    "lat": 20.509295,
+    "lon": -86.95739666666667,
+    "speed": 0,
+    "course": 199.2,
+    "last_seen": "2025-12-14T15:01:01+00:00"
+  },
+  "357698000": {
+    "name": "MSC SPLENDIDA",
+    "line": "msc",
+    "lat": 43.34446166666667,
+    "lon": 5.32849,
+    "speed": 0,
+    "course": 330.4,
+    "last_seen": "2025-12-14T15:05:12+00:00"
+  },
+  "311000912": {
+    "name": "ODYSSEY OF THE SEAS",
+    "line": "royal",
+    "lat": 40.66441,
+    "lon": -74.06906000000001,
+    "speed": 0,
+    "course": 29,
+    "last_seen": "2025-12-14T15:06:04+00:00"
+  },
+  "311000396": {
+    "name": "HARMONY OF THE SEAS",
+    "line": "royal",
+    "lat": 29.31791666666667,
+    "lon": -94.78169833333332,
+    "speed": 0,
+    "course": 94,
+    "last_seen": "2025-12-14T15:03:16+00:00"
+  },
+  "311001223": {
+    "name": "CARNIVAL CELEBRATION",
+    "line": "carnival",
+    "lat": 25.779923333333333,
+    "lon": -80.17647166666667,
+    "speed": 0,
+    "course": 179.4,
+    "last_seen": "2025-12-14T15:03:20+00:00"
+  },
+  "311000710": {
+    "name": "NORWEGIAN BLISS",
+    "line": "ncl",
+    "lat": 33.743676666666666,
+    "lon": -118.27646333333334,
+    "speed": 0,
+    "course": 205.2,
+    "last_seen": "2025-12-14T15:06:59+00:00"
+  },
+  "354277000": {
+    "name": "CARNIVAL MIRACLE",
+    "line": "carnival",
+    "lat": 27.944823333333332,
+    "lon": -82.443565,
+    "speed": 0,
+    "course": 271.4,
+    "last_seen": "2025-12-14T15:07:23+00:00"
+  },
+  "311321000": {
+    "name": "VISION OF THE SEAS",
+    "line": "royal",
+    "lat": 28.413555,
+    "lon": -80.62362166666666,
+    "speed": 1,
+    "course": 172.6,
+    "last_seen": "2025-12-14T15:07:22+00:00"
+  },
+  "308457000": {
+    "name": "DISNEY WONDER",
+    "line": "disney",
+    "lat": -37.01609333333333,
+    "lon": 177.07440499999998,
+    "speed": 18.3,
+    "course": 115.2,
+    "last_seen": "2025-12-14T15:06:59+00:00"
+  }
+}

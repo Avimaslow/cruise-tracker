@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cruise Tracker — Ship Details</title>
+  <link rel="stylesheet" href="ship.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <a class="back" href="./">← Back</a>
+      <div class="titleblock">
+        <div id="shipName" class="title">Loading…</div>
+        <div id="shipMeta" class="meta">—</div>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card hero">
+        <div class="hero-left">
+          <div id="heroImage" class="hero-img skeleton"></div>
+        </div>
+
+        <div class="hero-right">
+          <div class="section-title">About</div>
+          <p id="shipSummary" class="summary skeleton-lines">Loading description…</p>
+
+          <div class="facts">
+            <div class="fact">
+              <div class="k">Line</div>
+              <div id="factLine" class="v">—</div>
+            </div>
+            <div class="fact">
+              <div class="k">MMSI</div>
+              <div id="factMmsi" class="v">—</div>
+            </div>
+            <div class="fact">
+              <div class="k">Last seen (ET)</div>
+              <div id="factLastSeen" class="v">—</div>
+            </div>
+            <div class="fact">
+              <div class="k">Ship local time</div>
+              <div id="factShipLocal" class="v">—</div>
+            </div>
+            <div class="fact">
+              <div class="k">Speed</div>
+              <div id="factSpeed" class="v">—</div>
+            </div>
+            <div class="fact">
+              <div class="k">Position</div>
+              <div id="factPos" class="v">—</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <a id="wikiLink" class="btn" href="#" target="_blank" rel="noopener noreferrer">Open Wikipedia</a>
+          </div>
+        </div>
+      </section>
+      <section class="card">
+  <h3>🛳️ Estimated Voyage</h3>
+
+  <div id="voyageCard">
+    <div class="row">
+       <b>Last Port</b><br>
+      <span id="vpLastPort">—</span>
+    </div>
+
+    <div class="row">
+       <b>At Sea</b><br>
+      <span id="vpAtSea">—</span>
+    </div>
+
+    <div class="row">
+       <b>Likely Next Port</b><br>
+      <span id="vpNextPort">—</span>
+    </div>
+  </div>
+</section>
+
+
+      <section class="card specs">
+        <div class="section-title">Ship Specs (from Wikipedia)</div>
+        <div id="specGrid" class="spec-grid"></div>
+        <div class="footnote">Powered by Wikipedia (free).</div>
+      </section>
+    </main>
+  </div>
+
+  <script src="ship.js"></script>
+</body>
+</html>
