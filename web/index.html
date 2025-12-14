@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cruise Tracker</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+</head>
+<body>
+  <div class="app">
+  <aside class="sidebar">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="logo">CT</div>
+      <div>
+        <div class="title">Cruise Tracker</div>
+        <div class="subtitle">Live ship tracking</div>
+      </div>
+    </div>
+
+    <!-- Status panel -->
+    <div class="panel">
+      <div class="panel-row">
+        <div class="label">Status</div>
+        <div id="status" class="pill">Connecting</div>
+      </div>
+      <div class="panel-row">
+        <div class="label">Last update</div>
+        <div id="lastUpdate" class="value">—</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search">
+      <input id="searchInput" placeholder="Search ship name…" />
+    </div>
+
+    <!-- ✅ Cruise line filters (INSIDE sidebar) -->
+    <div class="line-filters">
+      <div class="line-title">Cruise line</div>
+      <div id="lineChips" class="chips">
+        <button class="chip active" data-line="all">All</button>
+        <button class="chip" data-line="royal">Royal</button>
+        <button class="chip" data-line="carnival">Carnival</button>
+        <button class="chip" data-line="ncl">NCL</button>
+        <button class="chip" data-line="msc">MSC</button>
+        <button class="chip" data-line="virgin">Virgin</button>
+        <button class="chip" data-line="disney">Disney</button>
+      </div>
+    </div>
+
+    <!-- Ship list -->
+    <div id="shipList" class="ship-list"></div>
+
+    <div class="footer">
+      <div class="tiny">Tip: click a ship to fly to it.</div>
+    </div>
+  </aside>
+
+  <!-- ✅ MAP GETS FULL WIDTH AGAIN -->
+  <main class="map-wrap">
+    <div id="map"></div>
+    <div class="map-overlay">
+      <div class="overlay-card">
+        <div class="overlay-title">Live map</div>
+        <div class="overlay-subtitle">Auto-refreshes every 5 seconds</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="app.js"></script>
+</body>
+</html>

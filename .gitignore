@@ -1,0 +1,17 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# Data files
+backend/last_seen.json
+backend/data/
+backend/*.json
+
+# OS
+.DS_Store
+
+# Node
+node_modules/
