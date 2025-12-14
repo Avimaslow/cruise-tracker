@@ -104,7 +104,7 @@ Streams live AIS data and writes ship positions + routes.
 ```bash
 cd backend
 source .venv/bin/activate
-python tracker.py
+python TrackAPI.py
 ```
 You should see output like:
 [DISCOVERED] ICON OF THE SEAS [royal]
