@@ -9,7 +9,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=10" />
+
+
+
+
 
   <!-- Leaflet -->
   <link
@@ -19,69 +23,175 @@
     crossorigin=""
   />
 </head>
+
 <body>
-  <div class="app">
-  <aside class="sidebar">
+  <!-- Background chrome -->
+  <div class="hud-bg"></div>
+  <div class="hud-vignette"></div>
 
-    <!-- Brand -->
-    <div class="brand">
-      <div class="logo">CT</div>
-      <div>
-        <div class="title">Cruise Tracker</div>
-        <div class="subtitle">Live ship tracking</div>
+  <div class="hud-shell">
+    <!-- LEFT: Main sidebar -->
+    <aside class="hud-left">
+
+      <!-- Brand / header -->
+      <header class="hud-brand">
+        <div class="hud-logo">CT</div>
+        <div class="hud-brand-text">
+          <div class="hud-title">Cruise Tracker</div>
+          <div class="hud-subtitle">Live fleet intelligence</div>
+        </div>
+
+        <div class="hud-status">
+          <div class="hud-status-label">Status</div>
+          <div id="status" class="hud-pill">Connecting</div>
+        </div>
+      </header>
+
+      <!-- Quick stats -->
+      <section class="hud-card hud-card-tight">
+        <div class="hud-row">
+          <div class="hud-k">Last update</div>
+          <div id="lastUpdate" class="hud-v">—</div>
+        </div>
+        <div class="hud-row">
+          <div class="hud-k">Tip</div>
+          <div class="hud-v">Click a ship to fly + draw route</div>
+        </div>
+      </section>
+
+      <!-- Search -->
+      <section class="hud-card hud-search">
+        <div class="hud-section-title">Search</div>
+        <div class="hud-searchbox">
+          <span class="hud-search-ico">⌕</span>
+          <input id="searchInput" placeholder="Search ship name…" />
+        </div>
+      </section>
+
+      <!-- Cruise line filters -->
+      <section class="hud-card">
+        <div class="hud-section-title">Cruise line</div>
+        <div id="lineChips" class="hud-chips">
+          <button class="chip active" data-line="all">All</button>
+          <button class="chip" data-line="royal">Royal</button>
+          <button class="chip" data-line="carnival">Carnival</button>
+          <button class="chip" data-line="ncl">NCL</button>
+          <button class="chip" data-line="msc">MSC</button>
+          <button class="chip" data-line="virgin">Virgin</button>
+          <button class="chip" data-line="disney">Disney</button>
+        </div>
+
+        <!-- Optional legend (your JS can populate this) -->
+        <div id="legend" class="hud-legend"></div>
+      </section>
+
+      <!-- List -->
+      <section class="hud-card hud-list">
+        <div class="hud-section-title">Fleet</div>
+        <div id="shipList" class="ship-list"></div>
+      </section>
+
+      <footer class="hud-footer">
+        <div class="hud-footer-text">Cruise Tracker • Live ship tracking</div>
+      </footer>
+    </aside>
+
+    <!-- CENTER: Map canvas -->
+    <main class="hud-center">
+      <!-- Map frame -->
+      <div class="hud-map-frame">
+        <div id="map"></div>
+
+        <!-- HUD overlays (pure HTML; style in CSS) -->
+        <div class="hud-grid"></div>
+
+        <!-- Top-right overlay card -->
+        <div class="hud-top-right">
+          <div class="hud-overlay-card">
+            <div class="hud-overlay-title">Live map</div>
+            <div class="hud-overlay-sub">Auto-refreshes every 5 seconds</div>
+          </div>
+        </div>
+
+        <!-- Map tools (your existing ids) -->
+        <div class="map-tools" id="mapTools">
+          <button class="tool-btn" id="btnFitFleet" title="Zoom to all visible ships">Fit Fleet</button>
+          <button class="tool-btn" id="btnClearRoute" title="Clear selected route">Clear Route</button>
+          <button class="tool-btn" id="btnTogglePorts" title="Toggle port icons">Ports: On</button>
+        </div>
+
+        <!-- Bottom glow bar -->
+        <div class="hud-bottom-glow"></div>
+      </div>
+
+<!-- RIGHT: Fleet analytics -->
+<aside class="hud-right">
+  <div class="hud-rail-card">
+    <div class="hud-rail-title">Fleet analytics</div>
+    <div class="hud-rail-sub">Live rollups + selection</div>
+
+    <div class="hud-rail-metrics">
+      <div class="hud-metric">
+        <div class="hud-metric-k">Visible ships</div>
+        <div class="hud-metric-v" id="fleetTotal">—</div>
+      </div>
+
+      <div class="hud-metric">
+        <div class="hud-metric-k">Live ships</div>
+        <div class="hud-metric-v" id="fleetLive">—</div>
+      </div>
+
+      <div class="hud-metric">
+        <div class="hud-metric-k">Avg speed (live)</div>
+        <div class="hud-metric-v" id="fleetAvgSpeed">—</div>
+      </div>
+
+      <div class="hud-metric">
+        <div class="hud-metric-k">Fastest (live)</div>
+        <div class="hud-metric-v" id="fleetFastest">—</div>
       </div>
     </div>
 
-    <!-- Status panel -->
-    <div class="panel">
-      <div class="panel-row">
-        <div class="label">Status</div>
-        <div id="status" class="pill">Connecting</div>
-      </div>
-      <div class="panel-row">
-        <div class="label">Last update</div>
-        <div id="lastUpdate" class="value">—</div>
-      </div>
+    <div class="hud-rail-note" style="margin-top:14px">
+      <div style="font-weight:900; margin-bottom:8px;">Live/Total by line</div>
+      <div id="lineBreakdown" style="display:grid; gap:8px;"></div>
     </div>
 
-    <!-- Search -->
-    <div class="search">
-      <input id="searchInput" placeholder="Search ship name…" />
-    </div>
-
-    <!-- ✅ Cruise line filters (INSIDE sidebar) -->
-    <div class="line-filters">
-      <div class="line-title">Cruise line</div>
-      <div id="lineChips" class="chips">
-        <button class="chip active" data-line="all">All</button>
-        <button class="chip" data-line="royal">Royal</button>
-        <button class="chip" data-line="carnival">Carnival</button>
-        <button class="chip" data-line="ncl">NCL</button>
-        <button class="chip" data-line="msc">MSC</button>
-        <button class="chip" data-line="virgin">Virgin</button>
-        <button class="chip" data-line="disney">Disney</button>
+    <div class="hud-rail-note">
+      <div style="font-weight:900; margin-bottom:8px;">Selected ship</div>
+      <div id="selShipName" style="font-weight:900;">None</div>
+      <div style="margin-top:8px; font-size:12px; line-height:1.5; opacity:.9;">
+        Speed: <span id="selShipSpeed">—</span><br/>
+        Course: <span id="selShipCourse">—</span><br/>
+        Last seen (ET): <span id="selShipLast">—</span>
       </div>
     </div>
+  </div>
+</aside>
 
-    <!-- Ship list -->
-    <div id="shipList" class="ship-list"></div>
 
-    <div class="footer">
-      <div class="tiny">Tip: click a ship to fly to it.</div>
-    </div>
-  </aside>
 
-  <!-- ✅ MAP GETS FULL WIDTH AGAIN -->
-  <main class="map-wrap">
-    <div id="map"></div>
-    <div class="map-overlay">
-      <div class="overlay-card">
-        <div class="overlay-title">Live map</div>
-        <div class="overlay-subtitle">Auto-refreshes every 5 seconds</div>
-      </div>
-    </div>
-  </main>
-</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   <script
@@ -89,6 +199,6 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

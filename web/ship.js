@@ -1,6 +1,36 @@
 // web/ship.js
+//
+// Ship Details page logic:
+// - Reads ?mmsi= from querystring
+// - Fetches live ship record from backend /api/last-seen
+// - (Optional) Fetches voyage prediction from backend /api/voyage/{mmsi} (handles 404 gracefully)
+// - Pulls Wikipedia summary + one image + "Infobox ship" specs
+//
+// IMPORTANT:
+// - This file auto-picks backend URL:
+//   1) if ?backend=... is provided, uses that
+//   2) if running locally (localhost/127.0.0.1), defaults to http://127.0.0.1:8000
+//   3) otherwise defaults to your Cloud Run backend URL below
 
-const API_LAST_SEEN = "http://127.0.0.1:8000/api/last-seen";
+/* -------------------------
+   Backend base URL
+------------------------- */
+const DEFAULT_BACKEND_CLOUDRUN = "https://cruise-backend-320129656576.us-east1.run.app";
+
+function getBackendBase() {
+  // Allow override: ship.html?mmsi=...&backend=https://...
+  const override = new URLSearchParams(window.location.search).get("backend");
+  if (override) return override.replace(/\/+$/, "");
+
+  const host = window.location.hostname || "";
+  const isLocal = host === "localhost" || host === "127.0.0.1";
+
+  if (isLocal) return "http://127.0.0.1:8000";
+  return DEFAULT_BACKEND_CLOUDRUN;
+}
+
+const BACKEND_BASE = getBackendBase();
+const API_LAST_SEEN = `${BACKEND_BASE}/api/last-seen`;
 
 /* -------------------------
    Querystring helpers
@@ -25,66 +55,6 @@ function formatEasternTime(iso) {
     second: "2-digit",
   });
 }
-function confidenceDots(conf) {
-  const c = Number(conf);
-  if (!Number.isFinite(c)) return "●○○○○";
-
-  // 0..1 -> 0..5 dots
-  const filled = Math.max(0, Math.min(5, Math.round(c * 5)));
-  return "●".repeat(filled) + "○".repeat(5 - filled);
-}
-
-
-
-async function loadVoyage(mmsi) {
-  try {
-    const res = await fetch(`http://127.0.0.1:8000/api/voyage/${encodeURIComponent(mmsi)}`, {
-      cache: "no-store",
-    });
-    if (!res.ok) return;
-
-    const v = await res.json();
-
-    // --- Last Port ---
-    const lastPortEl = document.getElementById("vpLastPort");
-    if (lastPortEl) {
-      if (v?.last_port?.name) {
-        const when = v.last_port.departed_at || v.last_port.arrived_at || null;
-        lastPortEl.innerText = `${v.last_port.name}\n${formatEasternTime(when)}`;
-      } else {
-        lastPortEl.innerText = "—";
-      }
-    }
-
-    // --- At Sea ---
-    const atSeaEl = document.getElementById("vpAtSea");
-    if (atSeaEl) {
-      if (v?.at_sea) {
-        const sp = v.at_sea.speed_kn != null ? `${Number(v.at_sea.speed_kn).toFixed(1)} kn` : "—";
-        const crs = v.at_sea.course_deg != null ? `${Math.round(Number(v.at_sea.course_deg))}°` : "—";
-        atSeaEl.innerText = `${sp} • Heading ${crs}`;
-      } else {
-        atSeaEl.innerText = "—";
-      }
-    }
-
-    // --- Likely Next Port ---
-    const nextEl = document.getElementById("vpNextPort");
-    if (nextEl) {
-      if (v?.likely_next_port?.name) {
-        const eta = v.likely_next_port.eta_hours != null ? `${Number(v.likely_next_port.eta_hours).toFixed(1)} h` : "—";
-        const dots = confidenceDots(v.confidence);
-        const pct = v.confidence != null ? `${Math.round(Number(v.confidence) * 100)}%` : "—";
-        nextEl.innerText = `${v.likely_next_port.name}\nETA ~ ${eta}\nConfidence ${dots} (${pct})`;
-      } else {
-        nextEl.innerText = "—";
-      }
-    }
-  } catch (e) {
-    // don't break the page if voyage fails
-  }
-}
-
 
 // simple "ship local time" approximation by longitude (15° per hour)
 function formatShipLocalTime(iso, lon) {
@@ -107,6 +77,16 @@ function formatShipLocalTime(iso, lon) {
 }
 
 /* -------------------------
+   Confidence UI helper
+------------------------- */
+function confidenceDots(conf) {
+  const c = Number(conf);
+  if (!Number.isFinite(c)) return "●○○○○";
+  const filled = Math.max(0, Math.min(5, Math.round(c * 5)));
+  return "●".repeat(filled) + "○".repeat(5 - filled);
+}
+
+/* -------------------------
    Backend fetch
 ------------------------- */
 async function fetchLastSeenRecord(mmsi) {
@@ -118,11 +98,69 @@ async function fetchLastSeenRecord(mmsi) {
 }
 
 /* -------------------------
+   Voyage prediction (optional endpoint)
+------------------------- */
+async function loadVoyage(mmsi) {
+  // If you don’t have /api/voyage/{mmsi} implemented in server.py yet,
+  // this will just no-op.
+  const voyageUrl = `${BACKEND_BASE}/api/voyage/${encodeURIComponent(mmsi)}`;
+
+  try {
+    const res = await fetch(voyageUrl, { cache: "no-store" });
+
+    // Missing endpoint -> don’t spam console, just leave placeholders.
+    if (res.status === 404) return;
+    if (!res.ok) return;
+
+    const v = await res.json();
+
+    // --- Last Port ---
+    const lastPortEl = document.getElementById("vpLastPort");
+    if (lastPortEl) {
+      if (v?.last_port?.name) {
+        const when = v.last_port.departed_at || v.last_port.arrived_at || null;
+        lastPortEl.innerText = `${v.last_port.name}\n${formatEasternTime(when)}`;
+      } else {
+        lastPortEl.innerText = "—";
+      }
+    }
+
+    // --- At Sea ---
+    const atSeaEl = document.getElementById("vpAtSea");
+    if (atSeaEl) {
+      if (v?.at_sea) {
+        const sp =
+          v.at_sea.speed_kn != null ? `${Number(v.at_sea.speed_kn).toFixed(1)} kn` : "—";
+        const crs =
+          v.at_sea.course_deg != null ? `${Math.round(Number(v.at_sea.course_deg))}°` : "—";
+        atSeaEl.innerText = `${sp} • Heading ${crs}`;
+      } else {
+        atSeaEl.innerText = "—";
+      }
+    }
+
+    // --- Likely Next Port ---
+    const nextEl = document.getElementById("vpNextPort");
+    if (nextEl) {
+      if (v?.likely_next_port?.name) {
+        const eta =
+          v.likely_next_port.eta_hours != null
+            ? `${Number(v.likely_next_port.eta_hours).toFixed(1)} h`
+            : "—";
+        const dots = confidenceDots(v.confidence);
+        const pct = v.confidence != null ? `${Math.round(Number(v.confidence) * 100)}%` : "—";
+        nextEl.innerText = `${v.likely_next_port.name}\nETA ~ ${eta}\nConfidence ${dots} (${pct})`;
+      } else {
+        nextEl.innerText = "—";
+      }
+    }
+  } catch (_) {
+    // keep UI usable even if voyage fetch fails
+  }
+}
+
+/* -------------------------
    Wikipedia: summary + infobox
-   Goal:
-   - Find best page title
-   - Get summary + image
-   - Parse {{Infobox ship}} for specs (capacity, crew, built, tonnage, etc.)
 ------------------------- */
 async function wikiSearchTitle(query) {
   const url =
@@ -138,9 +176,7 @@ async function wikiSearchTitle(query) {
 }
 
 async function wikiSummary(title) {
-  const url =
-    "https://en.wikipedia.org/api/rest_v1/page/summary/" +
-    encodeURIComponent(title);
+  const url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title);
 
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return null;
@@ -175,14 +211,17 @@ function extractInfoboxShip(wikitext) {
   const start = wikitext.indexOf("{{Infobox ship");
   if (start === -1) return null;
 
-  // Brace matching
+  // Brace matching for the infobox template
   let depth = 0;
   let i = start;
+
   for (; i < wikitext.length; i++) {
     if (wikitext[i] === "{" && wikitext[i + 1] === "{") depth++;
     if (wikitext[i] === "}" && wikitext[i + 1] === "}") depth--;
+
     if (depth === 0 && i > start) return wikitext.slice(start, i + 2);
   }
+
   return null;
 }
 
@@ -199,7 +238,7 @@ function parseInfoboxFields(infoboxText) {
     const key = m[1].trim().toLowerCase();
     let val = m[2].trim();
 
-    // Strip common wiki markup
+    // Strip some common wiki markup safely
     val = val
       .replace(/<ref[^>]*>.*?<\/ref>/g, "")
       .replace(/<ref[^\/]*\/>/g, "")
@@ -225,7 +264,6 @@ function normalizeShipSpecs(fields) {
     return null;
   };
 
-  // These keys vary a lot across pages; we try many common aliases
   const specs = [
     pick("Class", "class", "ship class"),
     pick("Builder", "builder"),
@@ -260,10 +298,8 @@ function normalizeShipSpecs(fields) {
 }
 
 async function getWikipediaShipProfileWithSpecs(shipName) {
-  // Better hit rate:
-  // 1) "<name> (ship)" / cruise ship variants
-  // 2) fallback to name alone
-  let title =
+  // Try higher hit-rate queries first:
+  const title =
     (await wikiSearchTitle(`${shipName} (ship)`)) ||
     (await wikiSearchTitle(`${shipName} cruise ship`)) ||
     (await wikiSearchTitle(shipName));
@@ -282,9 +318,8 @@ async function getWikipediaShipProfileWithSpecs(shipName) {
     title: summary.title,
     url: summary.url,
     summary: summary.summary,
-    mainImage: summary.image, // ONE image only
-    specs, // [label, value]
-    source: "Wikipedia",
+    mainImage: summary.image, // one image only
+    specs,
   };
 }
 
@@ -301,9 +336,19 @@ function setHtml(id, html) {
   if (el) el.innerHTML = html;
 }
 
+function escapeHtml(s) {
+  return String(s || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 function setHeroImage(url) {
   const hero = document.getElementById("heroImage");
   if (!hero) return;
+
   hero.classList.remove("skeleton");
   hero.innerHTML = url
     ? `<img src="${url}" alt="Ship photo" />`
@@ -323,22 +368,13 @@ function renderSpecs(specs) {
     .slice(0, 18)
     .map(
       ([k, v]) => `
-      <div class="spec-card">
-        <div class="spec-k">${escapeHtml(k)}</div>
-        <div class="spec-v">${escapeHtml(v)}</div>
-      </div>
-    `
+        <div class="spec-card">
+          <div class="spec-k">${escapeHtml(k)}</div>
+          <div class="spec-v">${escapeHtml(v)}</div>
+        </div>
+      `
     )
     .join("");
-}
-
-function escapeHtml(s) {
-  return String(s || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
 }
 
 /* -------------------------
@@ -350,16 +386,19 @@ function escapeHtml(s) {
     setText("shipName", "Missing MMSI");
     return;
   }
-await loadVoyage(mmsi);
 
+  // Always set MMSI immediately
   setText("factMmsi", String(mmsi));
+
+  // Voyage card (optional endpoint; safe if missing)
+  await loadVoyage(mmsi);
 
   // 1) Live data from backend
   let rec = null;
   try {
     rec = await fetchLastSeenRecord(mmsi);
-  } catch (e) {
-    // keep going
+  } catch (_) {
+    // keep going; page still works with Wikipedia fallback
   }
 
   const name = rec?.name || `MMSI ${mmsi}`;
@@ -394,13 +433,13 @@ await loadVoyage(mmsi);
   } else {
     setHtml("shipSummary", "Couldn’t find a Wikipedia match for this ship name yet.");
     setHeroImage(null);
-
     renderSpecs([]);
 
     const wikiLink = document.getElementById("wikiLink");
-    if (wikiLink)
+    if (wikiLink) {
       wikiLink.href = `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(
         `${name} ship`
       )}`;
+    }
   }
 })();
